@@ -151,35 +151,6 @@ def projectile_optimal_angle():
         }), 400
 
 
-@app.route('/api/projectile/compare', methods=['POST'])
-def projectile_compare():
-    """Compare multiple trajectories"""
-    try:
-        data = request.json
-        trajectories_params = data.get('trajectories', [])
-        
-        # Get all trajectories
-        trajectories = projectile_engine.compare_trajectories(trajectories_params)
-        
-        # Generate comparison graphs
-        trajectory_graph = graph_gen.plot_trajectory(trajectories, comparison_mode=True)
-        range_graph = graph_gen.plot_range_analysis(trajectories)
-        
-        return jsonify({
-            'status': 'success',
-            'trajectories': trajectories,
-            'graphs': {
-                'trajectory': trajectory_graph,
-                'range': range_graph
-            }
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 400
-
-
 # ==================== DOUBLE PENDULUM ENDPOINTS ====================
 
 @app.route('/api/pendulum/simulate', methods=['POST'])
@@ -256,47 +227,6 @@ def pendulum_analyze():
             'status': 'success',
             'graphs': graphs,
             'trajectory': trajectory
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 400
-
-
-@app.route('/api/pendulum/chaos', methods=['POST'])
-def pendulum_chaos():
-    """Demonstrate chaos with two similar initial conditions"""
-    try:
-        data = request.json
-        
-        m1 = float(data.get('m1', 1))
-        m2 = float(data.get('m2', 1))
-        L1 = float(data.get('L1', 1))
-        L2 = float(data.get('L2', 1))
-        theta1 = float(data.get('theta1', 90))
-        theta2 = float(data.get('theta2', 90))
-        omega1 = float(data.get('omega1', 0))
-        omega2 = float(data.get('omega2', 0))
-        t_max = float(data.get('t_max', 20))
-        fps = int(data.get('fps', 100))
-        difference = float(data.get('difference', 0.1))
-        
-        # Run chaos comparison
-        chaos_result = pendulum_engine.compare_chaos(
-            m1, m2, L1, L2, theta1, theta2, omega1, omega2, 
-            difference, t_max, fps
-        )
-        
-        # Generate divergence graph
-        divergence_graph = graph_gen.plot_chaos_divergence(chaos_result['chaos_metrics'])
-        
-        return jsonify({
-            'status': 'success',
-            'trajectory1': chaos_result['trajectory1'],
-            'trajectory2': chaos_result['trajectory2'],
-            'chaos_metrics': chaos_result['chaos_metrics'],
-            'graph': divergence_graph
         })
     except Exception as e:
         return jsonify({

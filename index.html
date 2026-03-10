@@ -44,20 +44,33 @@
             <button class="tab-btn active" data-tab="projectile">
                 <svg class="tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-                    <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2" />
-                    <circle cx="12" cy="12" r="2" fill="currentColor" />
+                    <!-- Ground line -->
+                    <line x1="1" y1="21" x2="23" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- Parabolic arc -->
+                    <path d="M 2 20 Q 12 2 22 20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <!-- Ball at peak -->
+                    <circle cx="12" cy="6" r="2" fill="currentColor"/>
+                    <!-- Launch arrow -->
+                    <line x1="2" y1="20" x2="5" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <polyline points="3,13.5 5,14 4.5,16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 Projectile Motion
             </button>
             <button class="tab-btn" data-tab="pendulum">
                 <svg class="tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
-                    <path d="M12 3 L12 7 M12 17 L12 21 M3 12 L7 12 M17 12 L21 12" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" />
-                    <path d="M6.5 6.5 L9 9 M15 15 L17.5 17.5 M6.5 17.5 L9 15 M15 9 L17.5 6.5" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" />
+                    <!-- Ceiling / pivot bar -->
+                    <line x1="8" y1="2" x2="16" y2="2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Pivot dot -->
+                    <circle cx="12" cy="2" r="1.5" fill="currentColor"/>
+                    <!-- First arm -->
+                    <line x1="12" y1="2" x2="7" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <!-- First bob -->
+                    <circle cx="7" cy="11" r="2.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <!-- Second arm -->
+                    <line x1="7" y1="11" x2="15" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Second bob -->
+                    <circle cx="15" cy="20" r="2.5" stroke="currentColor" stroke-width="2" fill="none"/>
                 </svg>
                 Double Pendulum
             </button>
@@ -69,12 +82,12 @@
                 <!-- Left Panel: Controls -->
                 <aside class="controls-panel">
                     <div class="panel-card">
-                        <h2 class="panel-title">Parameters</h2>
+                        <h2 class="panel-title"><span class="info-term" data-key="parameters">Parameters</span></h2>
 
                         <!-- Drag Coefficient -->
                         <div class="control-group">
                             <label class="control-label">
-                                Drag Coefficient (B)
+                                <span class="info-term" data-key="drag_coeff">Drag Coefficient (B)</span>
                                 <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
                                     data-tooltip="Air resistance coefficient. 0 = vacuum, higher = more resistance">
@@ -100,7 +113,7 @@
                         <!-- Initial Velocity -->
                         <div class="control-group">
                             <label class="control-label">
-                                Initial Velocity (v₀)
+                                <span class="info-term" data-key="init_velocity">Initial Velocity (v₀)</span>
                                 <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg" data-tooltip="Launch speed in m/s">
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
@@ -120,7 +133,7 @@
                         <!-- Launch Angle -->
                         <div class="control-group">
                             <label class="control-label">
-                                Launch Angle (θ)
+                                <span class="info-term" data-key="launch_angle">Launch Angle (θ)</span>
                                 <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg" data-tooltip="Angle from horizontal in degrees">
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
@@ -142,7 +155,7 @@
 
                         <!-- Simulation Time -->
                         <div class="control-group">
-                            <label class="control-label">Max Simulation Time</label>
+                            <label class="control-label"><span class="info-term" data-key="sim_time">Max Simulation Time</span></label>
                             <div class="slider-container">
                                 <input type="range" id="time-slider" class="slider" min="1" max="20" step="1"
                                     value="10">
@@ -156,7 +169,7 @@
 
                         <!-- Preset Scenarios -->
                         <div class="control-group">
-                            <label class="control-label">Preset Scenarios</label>
+                            <label class="control-label"><span class="info-term" data-key="presets">Preset Scenarios</span></label>
                             <select id="projectile-presets" class="select-input">
                                 <option value="">-- Select a preset --</option>
                             </select>
@@ -192,20 +205,14 @@
                             </button>
                         </div>
 
-                        <!-- Comparison Mode Toggle -->
-                        <div class="control-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="comparison-mode">
-                                <span>Comparison Mode (up to 3 trajectories)</span>
-                            </label>
-                        </div>
+
                     </div>
                 </aside>
 
                 <!-- Center Panel: Main Visualization -->
                 <div class="main-panel">
                     <div class="panel-card">
-                        <h2 class="panel-title">Trajectory Visualization</h2>
+                        <h2 class="panel-title"><span class="info-term" data-key="traj_viz">Trajectory Visualization</span></h2>
                         <div class="canvas-container">
                             <canvas id="projectile-canvas" width="800" height="500"></canvas>
                             <div id="projectile-loading" class="loading-indicator" style="display: none;">
@@ -263,11 +270,11 @@
 
                         <!-- Tabs for different analysis views -->
                         <div class="analysis-tabs">
-                            <button class="analysis-tab active" data-analysis="velocity">Velocity</button>
-                            <button class="analysis-tab" data-analysis="height">Height</button>
-                            <button class="analysis-tab" data-analysis="energy">Energy</button>
-                            <button class="analysis-tab" data-analysis="optimal">Optimal</button>
-                            <button class="analysis-tab" data-analysis="drag">Air Resist</button>
+                            <button class="analysis-tab active" data-analysis="velocity">Velocity <span class="tab-info-icon" data-key="chart_velocity" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="height">Height <span class="tab-info-icon" data-key="chart_height" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="energy">Energy <span class="tab-info-icon" data-key="chart_energy" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="optimal">Optimal <span class="tab-info-icon" data-key="chart_optimal" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="drag">Air Resist <span class="tab-info-icon" data-key="chart_air" title="What is this chart?">ℹ</span></button>
                         </div>
 
                         <!-- Analysis Content -->
@@ -348,13 +355,13 @@
                 <!-- Left Panel: Controls -->
                 <aside class="controls-panel">
                     <div class="panel-card">
-                        <h2 class="panel-title">Pendulum Parameters</h2>
+                        <h2 class="panel-title"><span class="info-term" data-key="pend_params">Pendulum Parameters</span></h2>
 
                         <h3 class="subsection-title">First Pendulum</h3>
 
                         <!-- Mass 1 -->
                         <div class="control-group">
-                            <label class="control-label">Mass (m₁)</label>
+                            <label class="control-label"><span class="info-term" data-key="mass1">Mass (m₁)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="m1-slider" class="slider" min="0.1" max="10" step="0.1"
                                     value="1">
@@ -366,7 +373,7 @@
 
                         <!-- Length 1 -->
                         <div class="control-group">
-                            <label class="control-label">Length (L₁)</label>
+                            <label class="control-label"><span class="info-term" data-key="length1">Length (L₁)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="L1-slider" class="slider" min="0.1" max="5" step="0.1"
                                     value="1">
@@ -378,7 +385,7 @@
 
                         <!-- Angle 1 -->
                         <div class="control-group">
-                            <label class="control-label">Initial Angle (θ₁)</label>
+                            <label class="control-label"><span class="info-term" data-key="theta1">Initial Angle (θ₁)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="theta1-slider" class="slider" min="-180" max="180" step="1"
                                     value="90">
@@ -390,7 +397,7 @@
 
                         <!-- Angular Velocity 1 -->
                         <div class="control-group">
-                            <label class="control-label">Angular Velocity (ω₁)</label>
+                            <label class="control-label"><span class="info-term" data-key="omega1">Angular Velocity (ω₁)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="omega1-slider" class="slider" min="-20" max="20" step="0.5"
                                     value="0">
@@ -406,7 +413,7 @@
 
                         <!-- Mass 2 -->
                         <div class="control-group">
-                            <label class="control-label">Mass (m₂)</label>
+                            <label class="control-label"><span class="info-term" data-key="mass2">Mass (m₂)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="m2-slider" class="slider" min="0.1" max="10" step="0.1"
                                     value="1">
@@ -418,7 +425,7 @@
 
                         <!-- Length 2 -->
                         <div class="control-group">
-                            <label class="control-label">Length (L₂)</label>
+                            <label class="control-label"><span class="info-term" data-key="length2">Length (L₂)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="L2-slider" class="slider" min="0.1" max="5" step="0.1"
                                     value="1">
@@ -430,7 +437,7 @@
 
                         <!-- Angle 2 -->
                         <div class="control-group">
-                            <label class="control-label">Initial Angle (θ₂)</label>
+                            <label class="control-label"><span class="info-term" data-key="theta2">Initial Angle (θ₂)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="theta2-slider" class="slider" min="-180" max="180" step="1"
                                     value="90">
@@ -442,7 +449,7 @@
 
                         <!-- Angular Velocity 2 -->
                         <div class="control-group">
-                            <label class="control-label">Angular Velocity (ω₂)</label>
+                            <label class="control-label"><span class="info-term" data-key="omega2">Angular Velocity (ω₂)</span></label>
                             <div class="slider-container">
                                 <input type="range" id="omega2-slider" class="slider" min="-20" max="20" step="0.5"
                                     value="0">
@@ -458,7 +465,7 @@
 
                         <!-- Duration -->
                         <div class="control-group">
-                            <label class="control-label">Duration</label>
+                            <label class="control-label"><span class="info-term" data-key="p_duration">Duration</span></label>
                             <div class="slider-container">
                                 <input type="range" id="duration-slider" class="slider" min="5" max="100" step="5"
                                     value="20">
@@ -470,7 +477,7 @@
 
                         <!-- FPS -->
                         <div class="control-group">
-                            <label class="control-label">Quality (FPS)</label>
+                            <label class="control-label"><span class="info-term" data-key="fps">Quality (FPS)</span></label>
                             <select id="fps-select" class="select-input">
                                 <option value="50">Low (50 fps)</option>
                                 <option value="100" selected>Medium (100 fps)</option>
@@ -482,7 +489,7 @@
 
                         <!-- Presets -->
                         <div class="control-group">
-                            <label class="control-label">Preset Scenarios</label>
+                            <label class="control-label"><span class="info-term" data-key="p_presets">Preset Scenarios</span></label>
                             <select id="pendulum-presets" class="select-input">
                                 <option value="">-- Select a preset --</option>
                             </select>
@@ -497,15 +504,7 @@
                                 </svg>
                                 Simulate
                             </button>
-                            <button id="demonstrate-chaos" class="btn btn-secondary">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M21 4L14 4 17 7 12 12 8 8 3 13M21 4L21 11M21 4L14 4" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                                </svg>
-                                Demonstrate Chaos
-                            </button>
+
                             <button id="reset-pendulum" class="btn btn-outline">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -523,7 +522,7 @@
                 <!-- Center Panel: Animation -->
                 <div class="main-panel">
                     <div class="panel-card">
-                        <h2 class="panel-title">Pendulum Animation</h2>
+                        <h2 class="panel-title"><span class="info-term" data-key="pend_anim">Pendulum Animation</span></h2>
                         <div class="canvas-container pendulum-canvas-container">
                             <canvas id="pendulum-canvas" width="600" height="600"></canvas>
                             <div id="pendulum-loading" class="loading-indicator" style="display: none;">
@@ -586,13 +585,12 @@
 
                         <!-- Analysis Tabs -->
                         <div class="analysis-tabs pendulum-tabs">
-                            <button class="analysis-tab active" data-analysis="angles">Angles</button>
-                            <button class="analysis-tab" data-analysis="velocity">Velocity</button>
-                            <button class="analysis-tab" data-analysis="phase">Phase</button>
-                            <button class="analysis-tab" data-analysis="energy">Energy</button>
-                            <button class="analysis-tab" data-analysis="chaos">Chaos</button>
-                            <button class="analysis-tab" data-analysis="frequency">FFT</button>
-                            <button class="analysis-tab" data-analysis="heatmap">Heatmap</button>
+                            <button class="analysis-tab active" data-analysis="angles">Angles <span class="tab-info-icon" data-key="pchart_angles" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="velocity">Velocity <span class="tab-info-icon" data-key="pchart_velocity" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="phase">Phase <span class="tab-info-icon" data-key="pchart_phase" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="energy">Energy <span class="tab-info-icon" data-key="pchart_energy" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="frequency">FFT <span class="tab-info-icon" data-key="pchart_fft" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="heatmap">Heatmap <span class="tab-info-icon" data-key="pchart_heatmap" title="What is this chart?">ℹ</span></button>
                         </div>
 
                         <!-- Analysis Content -->
@@ -608,10 +606,6 @@
                             </div>
                             <div id="pendulum-analysis-energy" class="analysis-view">
                                 <img id="pendulum-graph-energy" class="graph-image" alt="Energy Conservation">
-                            </div>
-                            <div id="pendulum-analysis-chaos" class="analysis-view">
-                                <img id="pendulum-graph-chaos" class="graph-image" alt="Chaos Metrics">
-                                <div id="chaos-stats" class="chaos-stats"></div>
                             </div>
                             <div id="pendulum-analysis-frequency" class="analysis-view">
                                 <img id="pendulum-graph-frequency" class="graph-image" alt="Frequency Spectrum">
