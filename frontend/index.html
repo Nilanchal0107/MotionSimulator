@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Interactive educational physics simulator for projectile motion and double pendulum dynamics with real-time visualizations and comprehensive analysis">
+    <meta name="keywords" content="physics, simulation, projectile motion, double pendulum, chaos, education">
+    <title>Physics Motion Simulator | Interactive Educational Tool</title>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">Physics Motion Simulator</h1>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Simulation Type Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="projectile">
+                <svg class="tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <!-- Ground line -->
+                    <line x1="1" y1="21" x2="23" y2="21" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                    <!-- Parabolic arc -->
+                    <path d="M 2 20 Q 12 2 22 20" stroke="currentColor" stroke-width="2" fill="none"
+                        stroke-linecap="round" />
+                    <!-- Ball at peak -->
+                    <circle cx="12" cy="6" r="2" fill="currentColor" />
+                    <!-- Launch arrow -->
+                    <line x1="2" y1="20" x2="5" y2="14" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                    <polyline points="3,13.5 5,14 4.5,16" stroke="currentColor" stroke-width="1.5" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Projectile Motion
+            </button>
+            <button class="tab-btn" data-tab="pendulum">
+                <svg class="tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <!-- Ceiling / pivot bar -->
+                    <line x1="8" y1="2" x2="16" y2="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <!-- Pivot dot -->
+                    <circle cx="12" cy="2" r="1.5" fill="currentColor" />
+                    <!-- First arm -->
+                    <line x1="12" y1="2" x2="7" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <!-- First bob -->
+                    <circle cx="7" cy="11" r="2.5" stroke="currentColor" stroke-width="2" fill="none" />
+                    <!-- Second arm -->
+                    <line x1="7" y1="11" x2="15" y2="20" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" />
+                    <!-- Second bob -->
+                    <circle cx="15" cy="20" r="2.5" stroke="currentColor" stroke-width="2" fill="none" />
+                </svg>
+                Double Pendulum
+            </button>
+        </div>
+
+        <!-- ========== PROJECTILE MOTION SECTION ========== -->
+        <section id="projectile-section" class="simulation-section active">
+            <div class="simulation-grid">
+                <!-- Left Panel: Controls -->
+                <aside class="controls-panel">
+                    <div class="panel-card">
+                        <h2 class="panel-title"><span class="info-term" data-key="parameters">Parameters</span></h2>
+
+                        <!-- Drag Coefficient -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <span class="info-term" data-key="drag_coeff">Drag Coefficient (B)</span>
+                                <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    data-tooltip="Air resistance coefficient. 0 = vacuum, higher = more resistance">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </label>
+                            <div class="slider-container">
+                                <input type="range" id="drag-slider" class="slider" min="0" max="5" step="0.1"
+                                    value="0.3">
+                                <input type="number" id="drag-input" class="number-input" min="0" max="5" step="0.1"
+                                    value="0.3">
+                            </div>
+                            <div class="preset-buttons">
+                                <button class="preset-btn" data-value="0">Vacuum</button>
+                                <button class="preset-btn" data-value="0.3">Soccer Ball</button>
+                                <button class="preset-btn" data-value="1.0">Golf Ball</button>
+                                <button class="preset-btn" data-value="2.5">Shuttlecock</button>
+                            </div>
+                        </div>
+
+                        <!-- Initial Velocity -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <span class="info-term" data-key="init_velocity">Initial Velocity (v₀)</span>
+                                <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" data-tooltip="Launch speed in m/s">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </label>
+                            <div class="slider-container">
+                                <input type="range" id="velocity-slider" class="slider" min="1" max="100" step="1"
+                                    value="20">
+                                <input type="number" id="velocity-input" class="number-input" min="1" max="100" step="1"
+                                    value="20">
+                                <span class="unit-label">m/s</span>
+                            </div>
+                        </div>
+
+                        <!-- Launch Angle -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <span class="info-term" data-key="launch_angle">Launch Angle (θ)</span>
+                                <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" data-tooltip="Angle from horizontal in degrees">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </label>
+                            <div class="slider-container">
+                                <input type="range" id="angle-slider" class="slider" min="5" max="85" step="1"
+                                    value="45">
+                                <input type="number" id="angle-input" class="number-input" min="5" max="85" step="1"
+                                    value="45">
+                                <span class="unit-label">degrees</span>
+                            </div>
+                            <div class="angle-display">
+                                <span id="angle-radians">0.785 rad</span>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Time -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="sim_time">Max Simulation
+                                    Time</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="time-slider" class="slider" min="1" max="20" step="1"
+                                    value="10">
+                                <input type="number" id="time-input" class="number-input" min="1" max="20" step="1"
+                                    value="10">
+                                <span class="unit-label">seconds</span>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <!-- Gravity Selector (#9) -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="gravity">Gravity
+                                    (Planet)</span></label>
+                            <select id="proj-gravity-select" class="select-input">
+                                <option value="earth" selected>🌍 Earth (9.81 m/s²)</option>
+                                <option value="moon">🌕 Moon (1.62 m/s²)</option>
+                                <option value="mars">🔴 Mars (3.72 m/s²)</option>
+                                <option value="jupiter">🪐 Jupiter (24.79 m/s²)</option>
+                            </select>
+                        </div>
+
+                        <!-- Preset Scenarios -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="presets">Preset
+                                    Scenarios</span></label>
+                            <select id="projectile-presets" class="select-input">
+                                <option value="">-- Select a preset --</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button id="simulate-projectile" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5v14l11-7z" fill="currentColor" />
+                                </svg>
+                                Simulate
+                            </button>
+                            <button id="find-optimal-angle" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                    <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2" />
+                                    <circle cx="12" cy="12" r="2" fill="currentColor" />
+                                </svg>
+                                Find Optimal Angle
+                            </button>
+                            <button id="reset-projectile" class="btn btn-outline">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                Reset
+                            </button>
+                        </div>
+
+
+                    </div>
+                </aside>
+
+                <!-- Center Panel: Main Visualization -->
+                <div class="main-panel">
+                    <div class="panel-card">
+                        <h2 class="panel-title"><span class="info-term" data-key="traj_viz">Trajectory
+                                Visualization</span></h2>
+                        <div class="canvas-container">
+                            <canvas id="projectile-canvas" width="800" height="500"></canvas>
+                            <div id="projectile-loading" class="loading-indicator" style="display: none;">
+                                <div class="spinner"></div>
+                                <p>Calculating trajectory...</p>
+                            </div>
+                        </div>
+
+                        <!-- Playback Controls -->
+                        <div class="playback-controls">
+                            <button id="play-projectile" class="control-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5v14l11-7z" fill="currentColor" />
+                                </svg>
+                            </button>
+                            <button id="pause-projectile" class="control-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor" />
+                                </svg>
+                            </button>
+                            <button id="restart-projectile" class="control-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                            <div class="speed-control">
+                                <label>Speed:</label>
+                                <select id="projectile-speed" class="speed-select">
+                                    <option value="0.25">0.25x</option>
+                                    <option value="0.5">0.5x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="2">2x</option>
+                                    <option value="4">4x</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Key Statistics -->
+                        <div id="projectile-stats" class="stats-grid">
+                            <!-- Stats will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Analysis -->
+                <aside class="analysis-panel">
+                    <div class="panel-card">
+                        <h2 class="panel-title">Analysis</h2>
+
+                        <!-- Tabs for different analysis views -->
+                        <div class="analysis-tabs">
+                            <button class="analysis-tab active" data-analysis="velocity">Velocity <span
+                                    class="tab-info-icon" data-key="chart_velocity"
+                                    title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="height">Height <span class="tab-info-icon"
+                                    data-key="chart_height" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="energy">Energy <span class="tab-info-icon"
+                                    data-key="chart_energy" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="optimal">Optimal <span class="tab-info-icon"
+                                    data-key="chart_optimal" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="drag">Air Resist <span class="tab-info-icon"
+                                    data-key="chart_air" title="What is this chart?">ℹ</span></button>
+                        </div>
+
+                        <!-- Analysis Content -->
+                        <div class="analysis-content">
+                            <div id="analysis-velocity" class="analysis-view active">
+                                <img id="graph-velocity" class="graph-image" alt="Velocity Analysis">
+                            </div>
+                            <div id="analysis-height" class="analysis-view">
+                                <img id="graph-height" class="graph-image" alt="Height vs Time">
+                            </div>
+                            <div id="analysis-energy" class="analysis-view">
+                                <img id="graph-energy" class="graph-image" alt="Energy Analysis">
+                            </div>
+                            <div id="analysis-optimal" class="analysis-view">
+                                <img id="graph-optimal" class="graph-image" alt="Optimal Angle">
+                            </div>
+                            <div id="analysis-drag" class="analysis-view">
+                                <img id="graph-drag" class="graph-image" alt="Air Resistance Comparison">
+                            </div>
+                        </div>
+
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Educational Section (Collapsible) -->
+            <details class="educational-section">
+                <summary class="educational-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="display:inline-block;vertical-align:middle;margin-right:8px;">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Learn About Projectile Motion
+                </summary>
+                <div class="educational-content">
+                    <h3>Physics Principles</h3>
+                    <p>Projectile motion describes the path of an object thrown or projected into the air. In a vacuum,
+                        the trajectory follows a perfect parabola governed by kinematic equations.</p>
+
+                    <h4>Key Equations</h4>
+                    <div class="equation-card">
+                        <p><strong>Position:</strong></p>
+                        <p>x(t) = v₀ cos(θ) t</p>
+                        <p>y(t) = v₀ sin(θ) t - ½ g t²</p>
+                    </div>
+                    <div class="equation-card">
+                        <p><strong>With Air Resistance:</strong></p>
+                        <p>F<sub>drag</sub> = -B v |v|</p>
+                        <p>Requires numerical integration to solve</p>
+                    </div>
+
+                    <h4>Real-World Applications</h4>
+                    <ul>
+                        <li>Sports: Basketball, golf, soccer trajectories</li>
+                        <li>Engineering: Ballistics, rocket science</li>
+                        <li>Meteorology: Precipitation patterns</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <!-- ========== DOUBLE PENDULUM SECTION ========== -->
+        <section id="pendulum-section" class="simulation-section">
+            <div class="simulation-grid">
+                <!-- Left Panel: Controls -->
+                <aside class="controls-panel">
+                    <div class="panel-card">
+                        <h2 class="panel-title"><span class="info-term" data-key="pend_params">Pendulum
+                                Parameters</span></h2>
+
+                        <h3 class="subsection-title">First Pendulum</h3>
+
+                        <!-- Mass 1 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="mass1">Mass
+                                    (m₁)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="m1-slider" class="slider" min="0.1" max="10" step="0.1"
+                                    value="1">
+                                <input type="number" id="m1-input" class="number-input" min="0.1" max="10" step="0.1"
+                                    value="1">
+                                <span class="unit-label">kg</span>
+                            </div>
+                        </div>
+
+                        <!-- Length 1 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="length1">Length
+                                    (L₁)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="L1-slider" class="slider" min="0.1" max="5" step="0.1"
+                                    value="1">
+                                <input type="number" id="L1-input" class="number-input" min="0.1" max="5" step="0.1"
+                                    value="1">
+                                <span class="unit-label">m</span>
+                            </div>
+                        </div>
+
+                        <!-- Angle 1 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="theta1">Initial Angle
+                                    (θ₁)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="theta1-slider" class="slider" min="-180" max="180" step="1"
+                                    value="90">
+                                <input type="number" id="theta1-input" class="number-input" min="-180" max="180"
+                                    step="1" value="90">
+                                <span class="unit-label">°</span>
+                            </div>
+                        </div>
+
+                        <!-- Angular Velocity 1 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="omega1">Angular Velocity
+                                    (ω₁)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="omega1-slider" class="slider" min="-20" max="20" step="0.5"
+                                    value="0">
+                                <input type="number" id="omega1-input" class="number-input" min="-20" max="20"
+                                    step="0.5" value="0">
+                                <span class="unit-label">rad/s</span>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <h3 class="subsection-title">Second Pendulum</h3>
+
+                        <!-- Mass 2 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="mass2">Mass
+                                    (m₂)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="m2-slider" class="slider" min="0.1" max="10" step="0.1"
+                                    value="1">
+                                <input type="number" id="m2-input" class="number-input" min="0.1" max="10" step="0.1"
+                                    value="1">
+                                <span class="unit-label">kg</span>
+                            </div>
+                        </div>
+
+                        <!-- Length 2 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="length2">Length
+                                    (L₂)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="L2-slider" class="slider" min="0.1" max="5" step="0.1"
+                                    value="1">
+                                <input type="number" id="L2-input" class="number-input" min="0.1" max="5" step="0.1"
+                                    value="1">
+                                <span class="unit-label">m</span>
+                            </div>
+                        </div>
+
+                        <!-- Angle 2 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="theta2">Initial Angle
+                                    (θ₂)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="theta2-slider" class="slider" min="-180" max="180" step="1"
+                                    value="90">
+                                <input type="number" id="theta2-input" class="number-input" min="-180" max="180"
+                                    step="1" value="90">
+                                <span class="unit-label">°</span>
+                            </div>
+                        </div>
+
+                        <!-- Angular Velocity 2 -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="omega2">Angular Velocity
+                                    (ω₂)</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="omega2-slider" class="slider" min="-20" max="20" step="0.5"
+                                    value="0">
+                                <input type="number" id="omega2-input" class="number-input" min="-20" max="20"
+                                    step="0.5" value="0">
+                                <span class="unit-label">rad/s</span>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <h3 class="subsection-title">Simulation Settings</h3>
+
+                        <!-- Duration -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term"
+                                    data-key="p_duration">Duration</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="duration-slider" class="slider" min="5" max="100" step="5"
+                                    value="20">
+                                <input type="number" id="duration-input" class="number-input" min="5" max="100" step="5"
+                                    value="20">
+                                <span class="unit-label">s</span>
+                            </div>
+                        </div>
+
+                        <!-- FPS -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="fps">Quality
+                                    (FPS)</span></label>
+                            <select id="fps-select" class="select-input">
+                                <option value="50">Low (50 fps)</option>
+                                <option value="100" selected>Medium (100 fps)</option>
+                                <option value="200">High (200 fps)</option>
+                            </select>
+                        </div>
+
+                        <!-- Damping Coefficient (#8) -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <span class="info-term" data-key="damping">Damping (b)</span>
+                                <svg class="tooltip" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    data-tooltip="Energy dissipation / friction. 0 = frictionless, higher = faster decay">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </label>
+                            <div class="slider-container">
+                                <input type="range" id="damping-slider" class="slider" min="0" max="2" step="0.05"
+                                    value="0">
+                                <input type="number" id="damping-input" class="number-input" min="0" max="2" step="0.05"
+                                    value="0">
+                            </div>
+                            <div class="preset-buttons">
+                                <button class="preset-btn" data-target="damping" data-value="0">None</button>
+                                <button class="preset-btn" data-target="damping" data-value="0.1">Light</button>
+                                <button class="preset-btn" data-target="damping" data-value="0.5">Medium</button>
+                                <button class="preset-btn" data-target="damping" data-value="1.5">Heavy</button>
+                            </div>
+                        </div>
+
+                        <!-- Gravity Selector (#9) -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="gravity">Gravity
+                                    (Planet)</span></label>
+                            <select id="pend-gravity-select" class="select-input">
+                                <option value="earth" selected>🌍 Earth (9.81 m/s²)</option>
+                                <option value="moon">🌕 Moon (1.62 m/s²)</option>
+                                <option value="mars">🔴 Mars (3.72 m/s²)</option>
+                                <option value="jupiter">🪐 Jupiter (24.79 m/s²)</option>
+                            </select>
+                        </div>
+
+                        <hr class="divider">
+
+                        <!-- Presets -->
+                        <div class="control-group">
+                            <label class="control-label"><span class="info-term" data-key="p_presets">Preset
+                                    Scenarios</span></label>
+                            <select id="pendulum-presets" class="select-input">
+                                <option value="">-- Select a preset --</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button id="simulate-pendulum" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5v14l11-7z" fill="currentColor" />
+                                </svg>
+                                Simulate
+                            </button>
+
+                            <button id="reset-pendulum" class="btn btn-outline">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Center Panel: Animation -->
+                <div class="main-panel">
+                    <div class="panel-card">
+                        <h2 class="panel-title"><span class="info-term" data-key="pend_anim">Pendulum Animation</span>
+                        </h2>
+                        <div class="canvas-container pendulum-canvas-container">
+                            <canvas id="pendulum-canvas" width="600" height="600"></canvas>
+                            <div id="pendulum-loading" class="loading-indicator" style="display: none;">
+                                <div class="spinner"></div>
+                                <p>Calculating motion...</p>
+                            </div>
+                        </div>
+
+                        <!-- Playback Controls -->
+                        <div class="playback-controls">
+                            <button id="play-pendulum" class="control-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5v14l11-7z" fill="currentColor" />
+                                </svg>
+                            </button>
+                            <button id="pause-pendulum" class="control-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor" />
+                                </svg>
+                            </button>
+                            <button id="restart-pendulum" class="control-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                            <div class="speed-control">
+                                <label>Speed:</label>
+                                <select id="pendulum-speed" class="speed-select">
+                                    <option value="0.25">0.25x</option>
+                                    <option value="0.5">0.5x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="2">2x</option>
+                                    <option value="4">4x</option>
+                                </select>
+                            </div>
+                            <div class="time-display">
+                                <span id="pendulum-time">T: 0.00s</span>
+                            </div>
+                        </div>
+
+                        <!-- Path Trace Canvas -->
+                        <div class="trace-section">
+                            <h3 class="subsection-title">Path Trace</h3>
+                            <canvas id="trace-canvas" width="400" height="400"></canvas>
+                            <button id="clear-trace" class="btn btn-outline btn-small">Clear Trace</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Analysis -->
+                <aside class="analysis-panel">
+                    <div class="panel-card">
+                        <h2 class="panel-title">Analysis</h2>
+
+                        <!-- Analysis Tabs -->
+                        <div class="analysis-tabs pendulum-tabs">
+                            <button class="analysis-tab active" data-analysis="angles">Angles <span
+                                    class="tab-info-icon" data-key="pchart_angles"
+                                    title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="velocity">Velocity <span class="tab-info-icon"
+                                    data-key="pchart_velocity" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="phase">Phase <span class="tab-info-icon"
+                                    data-key="pchart_phase" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="energy">Energy <span class="tab-info-icon"
+                                    data-key="pchart_energy" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="frequency">FFT <span class="tab-info-icon"
+                                    data-key="pchart_fft" title="What is this chart?">ℹ</span></button>
+                            <button class="analysis-tab" data-analysis="heatmap">Heatmap <span class="tab-info-icon"
+                                    data-key="pchart_heatmap" title="What is this chart?">ℹ</span></button>
+                        </div>
+
+                        <!-- Analysis Content -->
+                        <div class="analysis-content">
+                            <div id="pendulum-analysis-angles" class="analysis-view active">
+                                <img id="pendulum-graph-angles" class="graph-image" alt="Angles vs Time">
+                            </div>
+                            <div id="pendulum-analysis-velocity" class="analysis-view">
+                                <img id="pendulum-graph-velocity" class="graph-image" alt="Angular Velocity">
+                            </div>
+                            <div id="pendulum-analysis-phase" class="analysis-view">
+                                <img id="pendulum-graph-phase" class="graph-image" alt="Phase Space">
+                            </div>
+                            <div id="pendulum-analysis-energy" class="analysis-view">
+                                <img id="pendulum-graph-energy" class="graph-image" alt="Energy Conservation">
+                            </div>
+                            <div id="pendulum-analysis-frequency" class="analysis-view">
+                                <img id="pendulum-graph-frequency" class="graph-image" alt="Frequency Spectrum">
+                            </div>
+                            <div id="pendulum-analysis-heatmap" class="analysis-view">
+                                <img id="pendulum-graph-heatmap" class="graph-image" alt="Position Heatmap">
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div id="pendulum-stats" class="stats-list"></div>
+
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Educational Section -->
+            <details class="educational-section">
+                <summary class="educational-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="display:inline-block;vertical-align:middle;margin-right:8px;">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Learn About Double Pendulum & Chaos
+                </summary>
+                <div class="educational-content">
+                    <h3>Physics Principles</h3>
+                    <p>The double pendulum is a classic example of a <strong>chaotic system</strong>. Despite having
+                        simple, deterministic equations of motion, its behavior is highly sensitive to initial
+                        conditions.</p>
+
+                    <h4>Lagrangian Mechanics</h4>
+                    <p>The motion is described by coupled differential equations derived from the Lagrangian (L = T -
+                        V):</p>
+                    <div class="equation-card">
+                        <p>Complex coupled ODEs involving both angles and angular velocities</p>
+                        <p>Must be solved numerically using methods like Runge-Kutta</p>
+                    </div>
+
+                    <h4>Chaos & Sensitivity</h4>
+                    <p>The <strong>Lyapunov exponent</strong> measures how quickly nearby trajectories diverge. A
+                        positive exponent indicates chaos.</p>
+                    <p>This means long-term prediction is impossible - tiny measurement errors grow exponentially!</p>
+
+                    <h4>Real-World Examples</h4>
+                    <ul>
+                        <li>Weather systems (butterfly effect)</li>
+                        <li>Celestial mechanics (three-body problem)</li>
+                        <li>Economic systems</li>
+                        <li>Population dynamics</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Created with Flask, SciPy, and JavaScript | Educational Physics Simulator</p>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Utilities (load first — no dependencies) -->
+    <script src="scripts/utils/api.js"></script>
+    <script src="scripts/utils/dom.js"></script>
+    <script src="scripts/utils/format.js"></script>
+    <script src="scripts/utils/notifications.js"></script>
+    <script src="scripts/utils/download.js"></script>
+    <script src="scripts/utils/loading.js"></script>
+    <script src="scripts/utils/tabs.js"></script>
+
+    <!-- Core behaviours -->
+    <script src="scripts/core/keyboard.js"></script>
+    <script src="scripts/core/url_state.js"></script>
+
+    <!-- Simulator classes (depend on utils + core) -->
+    <script src="scripts/projectile/simulator.js"></script>
+    <script src="scripts/pendulum/simulator.js"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tab switching
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const sections = document.querySelectorAll('.simulation-section');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.dataset.tab;
+
+                    // Update active tab
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Update active section
+                    sections.forEach(section => {
+                        if (section.id === `${targetTab}-section`) {
+                            section.classList.add('active');
+                        } else {
+                            section.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Initialize simulators
+            if (typeof ProjectileSimulator !== 'undefined') {
+                window.projectileSimulator = new ProjectileSimulator();
+            }
+
+            if (typeof PendulumSimulator !== 'undefined') {
+                window.pendulumSimulator = new PendulumSimulator();
+            }
+        });
+    </script>
+</body>
+
+</html>
