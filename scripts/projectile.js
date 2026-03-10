@@ -12,8 +12,6 @@ class ProjectileSimulator {
         this.isPlaying = false;
         this.animationProgress = 0;
         this.playbackSpeed = 1;
-        this.comparisonMode = false;
-        this.trajectories = [];
 
         this.init();
     }
@@ -71,20 +69,19 @@ class ProjectileSimulator {
             this.playbackSpeed = parseFloat(e.target.value);
         });
 
-        // Comparison mode
-        document.getElementById('comparison-mode').addEventListener('change', (e) => {
-            this.comparisonMode = e.target.checked;
-            if (!this.comparisonMode) {
-                this.trajectories = [];
-                showNotification('Comparison mode disabled. Trajectories cleared.', 'info');
-            } else {
-                showNotification('Comparison mode enabled. Run simulate to add trajectories.', 'info');
-            }
-        });
+
 
         // Export
         document.getElementById('export-projectile').addEventListener('click', () => {
             this.exportData();
+        });
+
+        // Tab info icons — stop propagation so tab switch still works; open popup on icon click
+        document.querySelectorAll('#projectile-section .tab-info-icon').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showInfoPopup(icon.dataset.key, e);
+            });
         });
 
         // Preset scenarios
@@ -158,58 +155,16 @@ class ProjectileSimulator {
 
         try {
             const params = this.getParameters();
+            const result = await apiRequest('/api/projectile/analyze', 'POST', params);
 
-            // Check if comparison mode is enabled
-            if (this.comparisonMode) {
-                // Add current parameters to trajectories list
-                if (this.trajectories.length < 3) {
-                    this.trajectories.push({ ...params });
-                    showNotification(`Trajectory ${this.trajectories.length} added. ${3 - this.trajectories.length} more can be added.`, 'success');
+            if (result.status === 'success') {
+                this.trajectoryData = result.trajectory;
+                this.displayGraphs(result.graphs);
+                this.displayStatistics(result.trajectory);
 
-                    // If we have multiple trajectories, run comparison
-                    if (this.trajectories.length > 1) {
-                        const result = await apiRequest('/api/projectile/compare', 'POST', {
-                            trajectories: this.trajectories
-                        });
-
-                        if (result.status === 'success') {
-                            // Use the first trajectory for animation
-                            this.trajectoryData = result.trajectories[0];
-
-                            // Display comparison graphs in all tabs
-                            if (result.graphs && result.graphs.trajectory) {
-                                // Main trajectory comparison shows in velocity tab
-                                document.getElementById('graph-velocity').src = result.graphs.trajectory;
-                            }
-
-                            // Also analyze each trajectory for other views
-                            await this.displayComparisonAnalysis(this.trajectories);
-
-                            this.animationProgress = 0;
-                            this.drawTrajectory();
-                        }
-                    }
-                } else {
-                    showNotification('Maximum 3 trajectories reached. Uncheck comparison mode or reset.', 'warning');
-                }
-            } else {
-                // Normal single simulation
-                this.trajectories = []; // Reset trajectories when not in comparison mode
-                const result = await apiRequest('/api/projectile/analyze', 'POST', params);
-
-                if (result.status === 'success') {
-                    this.trajectoryData = result.trajectory;
-                    this.displayGraphs(result.graphs);
-                    this.displayStatistics(result.trajectory);
-
-                    if (result.comparison_stats) {
-                        this.displayComparisonStats(result.comparison_stats);
-                    }
-
-                    this.animationProgress = 0;
-                    this.drawTrajectory();
-                    showNotification('Simulation completed!', 'success');
-                }
+                this.animationProgress = 0;
+                this.drawTrajectory();
+                showNotification('Simulation completed!', 'success');
             }
         } catch (error) {
             console.error('Simulation failed:', error);
@@ -260,60 +215,33 @@ class ProjectileSimulator {
     }
 
     displayStatistics(trajectory) {
-        const stats = {
-            'Max Height': formatPhysicsValue(trajectory.max_height, 'm'),
-            'Time to Max': formatPhysicsValue(trajectory.time_to_max_height, 's'),
-            'Flight Time': formatPhysicsValue(trajectory.total_flight_time, 's'),
-            'Range': formatPhysicsValue(trajectory.horizontal_range, 'm'),
-            'Impact Speed': formatPhysicsValue(trajectory.impact_speed, 'm/s'),
-            'Impact Angle': formatPhysicsValue(trajectory.impact_angle_deg, '°'),
-            'Energy Lost': formatPhysicsValue(trajectory.energy_lost_percent, '%')
-        };
+        const stats = [
+            { key: 'max_height',    label: 'Max Height',    value: formatPhysicsValue(trajectory.max_height, 'm') },
+            { key: 'time_to_max',   label: 'Time to Max',   value: formatPhysicsValue(trajectory.time_to_max_height, 's') },
+            { key: 'flight_time',   label: 'Flight Time',   value: formatPhysicsValue(trajectory.total_flight_time, 's') },
+            { key: 'range',         label: 'Range',         value: formatPhysicsValue(trajectory.horizontal_range, 'm') },
+            { key: 'impact_speed',  label: 'Impact Speed',  value: formatPhysicsValue(trajectory.impact_speed, 'm/s') },
+            { key: 'impact_angle',  label: 'Impact Angle',  value: formatPhysicsValue(trajectory.impact_angle_deg, '°') },
+            { key: 'energy_lost',   label: 'Energy Lost',   value: formatPhysicsValue(trajectory.energy_lost_percent, '%') }
+        ];
 
         const statsContainer = document.getElementById('projectile-stats');
         statsContainer.innerHTML = '';
 
-        for (const [label, value] of Object.entries(stats)) {
+        for (const stat of stats) {
             const statCard = document.createElement('div');
             statCard.className = 'stat-card';
             statCard.innerHTML = `
-                <div class="stat-label">${label}</div>
-                <div class="stat-value">${value}</div>
+                <div class="stat-label">
+                    <span class="info-term" data-key="${stat.key}">${stat.label}</span>
+                </div>
+                <div class="stat-value">${stat.value}</div>
             `;
             statsContainer.appendChild(statCard);
         }
-    }
 
-    async displayComparisonAnalysis(trajectories) {
-        // Get detailed analysis for the last trajectory added
-        const lastTrajectory = trajectories[trajectories.length - 1];
-
-        try {
-            const result = await apiRequest('/api/projectile/analyze', 'POST', lastTrajectory);
-
-            if (result.status === 'success' && result.graphs) {
-                // Display all analysis graphs
-                if (result.graphs.height_vs_time) {
-                    document.getElementById('graph-height').src = result.graphs.height_vs_time;
-                }
-                if (result.graphs.energy) {
-                    document.getElementById('graph-energy').src = result.graphs.energy;
-                }
-                if (result.graphs.air_resistance) {
-                    document.getElementById('graph-drag').src = result.graphs.air_resistance;
-                }
-
-                // Display statistics for the last added trajectory
-                this.displayStatistics(result.trajectory);
-            }
-        } catch (error) {
-            console.error('Comparison analysis failed:', error);
-        }
-    }
-
-    displayComparisonStats(stats) {
-        // Could add a dedicated comparison stats display
-        console.log('Comparison stats:', stats);
+        // Bind the newly created info-term elements
+        initInfoTerms(statsContainer);
     }
 
     drawInitialCanvas() {
@@ -458,7 +386,6 @@ class ProjectileSimulator {
         this.pause();
         this.animationProgress = 0;
         this.trajectoryData = null;
-        this.trajectories = []; // Clear comparison trajectories
         this.drawInitialCanvas();
 
         // Reset controls to defaults
@@ -470,10 +397,6 @@ class ProjectileSimulator {
         document.getElementById('drag-input').value = 0.3;
         document.getElementById('time-slider').value = 10;
         document.getElementById('time-input').value = 10;
-
-        // Uncheck comparison mode
-        document.getElementById('comparison-mode').checked = false;
-        this.comparisonMode = false;
 
         this.updateAngleDisplay(45);
 

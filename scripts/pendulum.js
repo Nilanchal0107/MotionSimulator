@@ -46,9 +46,6 @@ class PendulumSimulator {
             this.simulate();
         });
 
-        document.getElementById('demonstrate-chaos').addEventListener('click', () => {
-            this.demonstrateChaos();
-        });
 
         document.getElementById('reset-pendulum').addEventListener('click', () => {
             this.reset();
@@ -105,6 +102,14 @@ class PendulumSimulator {
                         view.classList.remove('active');
                     }
                 });
+            });
+        });
+
+        // Tab info icons — stop propagation so tab switch still works
+        document.querySelectorAll('#pendulum-section .tab-info-icon').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showInfoPopup(icon.dataset.key, e);
             });
         });
     }
@@ -197,42 +202,6 @@ class PendulumSimulator {
         }
     }
 
-    async demonstrateChaos() {
-        showLoadingIndicator('pendulum-loading');
-
-        try {
-            const params = this.getParameters();
-            params.difference = 0.1; // 0.1 degree difference
-
-            const result = await apiRequest('/api/pendulum/chaos', 'POST', params);
-
-            if (result.status === 'success') {
-                // Display chaos divergence graph
-                document.getElementById('pendulum-graph-chaos').src = result.graph;
-
-                // Display chaos metrics
-                const metrics = result.chaos_metrics;
-                const statsDiv = document.getElementById('chaos-stats');
-                statsDiv.innerHTML = `
-                    <div class="stat-item"><strong>Lyapunov Exponent:</strong> ${formatNumber(metrics.lyapunov_exponent, 4)}</div>
-                    <div class="stat-item"><strong>Chaos Rating:</strong> ${metrics.chaos_rating}</div>
-                    <div class="stat-item"><strong>Predictability Time:</strong> ${formatNumber(metrics.predictability_time)}s</div>
-                    <div class="stat-item"><strong>Initial Separation:</strong> ${formatNumber(metrics.initial_separation, 6)}m</div>
-                    <div class="stat-item"><strong>Final Separation:</strong> ${formatNumber(metrics.final_separation)}m</div>
-                `;
-
-                // Switch to chaos tab
-                document.querySelector('[data-analysis="chaos"]').click();
-
-                showNotification('Chaos demonstration complete! See exponential divergence.', 'success');
-            }
-        } catch (error) {
-            console.error('Chaos demonstration failed:', error);
-        } finally {
-            hideLoadingIndicator('pendulum-loading');
-        }
-    }
-
     displayGraphs(graphs) {
         if (graphs.angles) document.getElementById('pendulum-graph-angles').src = graphs.angles;
         if (graphs.angular_velocity) document.getElementById('pendulum-graph-velocity').src = graphs.angular_velocity;
@@ -243,16 +212,28 @@ class PendulumSimulator {
     }
 
     displayStatistics(trajectory) {
+        const stats = [
+            { key: 'pend_max_theta',   label: 'Max θ₁',       value: `${formatNumber(trajectory.max_theta1_deg)}°` },
+            { key: 'pend_max_theta',   label: 'Max θ₂',       value: `${formatNumber(trajectory.max_theta2_deg)}°` },
+            { key: 'pend_max_omega',   label: 'Max ω₁',       value: `${formatNumber(trajectory.max_omega1)} rad/s` },
+            { key: 'pend_max_omega',   label: 'Max ω₂',       value: `${formatNumber(trajectory.max_omega2)} rad/s` },
+            { key: 'pend_rotations',   label: 'Rotations 1', value: trajectory.rotations1 },
+            { key: 'pend_rotations',   label: 'Rotations 2', value: trajectory.rotations2 },
+            { key: 'pend_energy_error',label: 'Energy Error',value: `${formatNumber(trajectory.energy_error_percent, 4)}%` }
+        ];
+
         const statsDiv = document.getElementById('pendulum-stats');
-        statsDiv.innerHTML = `
-            <div class="stat-item"><strong>Max θ₁:</strong> ${formatNumber(trajectory.max_theta1_deg)}°</div>
-            <div class="stat-item"><strong>Max θ₂:</strong> ${formatNumber(trajectory.max_theta2_deg)}°</div>
-            <div class="stat-item"><strong>Max ω₁:</strong> ${formatNumber(trajectory.max_omega1)} rad/s</div>
-            <div class="stat-item"><strong>Max ω₂:</strong> ${formatNumber(trajectory.max_omega2)} rad/s</div>
-            <div class="stat-item"><strong>Rotations 1:</strong> ${trajectory.rotations1}</div>
-            <div class="stat-item"><strong>Rotations 2:</strong> ${trajectory.rotations2}</div>
-            <div class="stat-item"><strong>Energy Error:</strong> ${formatNumber(trajectory.energy_error_percent, 4)}%</div>
-        `;
+        statsDiv.innerHTML = '';
+
+        for (const stat of stats) {
+            const item = document.createElement('div');
+            item.className = 'stat-item';
+            item.innerHTML = `<strong><span class="info-term" data-key="${stat.key}">${stat.label}</span>:</strong> ${stat.value}`;
+            statsDiv.appendChild(item);
+        }
+
+        // Bind newly created info-term elements
+        initInfoTerms(statsDiv);
     }
 
     drawInitialCanvas() {
